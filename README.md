@@ -38,7 +38,7 @@ pantry_tracker/
 │   ├── schemas.py          # Pydantic schemas for request/response validation
 │   └── services/           # Business logic
 │       ├── __init__.py
-│       ├── receipt_processor.py  # Handles OCR and item extraction from receipts
+│       ├── receipt_processor.py  # Handles item extraction from receipts
 │       └── recipe_recommender.py # Generates recipe suggestions
 ├── frontend/               # Frontend React application
 │   ├── public/
@@ -53,7 +53,7 @@ pantry_tracker/
 ├── .gitignore
 ├── README.md               # This file
 ├── requirements.txt        # Python backend dependencies
-└── pantry.db               # SQLite database file (ensure it's in .gitignore for public repos if it contains sensitive data)
+└── pantry.db               # SQLite database file
 ```
 
 ## Setup and Installation
