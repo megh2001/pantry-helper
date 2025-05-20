@@ -53,7 +53,6 @@ pantry_tracker/
 ├── .gitignore
 ├── README.md               # This file
 ├── requirements.txt        # Python backend dependencies
-├── .env.example            # Example environment variables file
 └── pantry.db               # SQLite database file (ensure it's in .gitignore for public repos if it contains sensitive data)
 ```
 
