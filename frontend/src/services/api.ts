@@ -1,6 +1,12 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { Ingredient, ToBuyItem, Recipe, RecipeResponse, UseRecipeResponse, RecipeRecommendationResponse } from '../types';
 
+// Define the new union type for the response
+export type RecipeOrChatResponse = 
+  | { recipes: Recipe[]; message?: never; error?: never }
+  | { message: string; recipes?: never; error?: never }
+  | { error: string; message?: never; recipes?: never }; // If error is present, message and recipes are not.
+
 // Create an Axios instance with default config
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
@@ -106,17 +112,40 @@ export const uploadReceipt = async (file: File): Promise<ReceiptResponse> => {
 };
 
 // Recipe API functions
-export const getRecipeRecommendation = async (userPrompt: string): Promise<Recipe[]> => {
+export const getRecipeRecommendation = async (userPrompt: string): Promise<RecipeOrChatResponse> => {
   try {
-    const response: AxiosResponse<Recipe[]> = await api.get('/recipes/recommend', {
+    const response: AxiosResponse<any> = await api.get('/recipes/recommend', {
       params: { user_prompt: userPrompt },
     });
     
-    console.log("Raw API response:", response);
-    return response.data;
+    console.log("Raw API response from /recipes/recommend:", response.data);
+
+    if (response.data && Array.isArray(response.data)) {
+      return { recipes: response.data as Recipe[] };
+    } else if (response.data && response.data.recipes) {
+      return { recipes: response.data.recipes as Recipe[] };
+    } else if (response.data && response.data.message) {
+      // This is a successful chat message from the backend (not an error)
+      return { message: response.data.message as string };
+    }
+    
+    console.warn("Unexpected response structure from /recipes/recommend:", response.data);
+    return { error: "Received an unexpected response from the server." }; 
+
   } catch (error) {
-    console.error("API error details:", error);
-    throw error;
+    console.error("API error details in getRecipeRecommendation:", error);
+    if (axios.isAxiosError(error) && error.response) {
+      const errorData = error.response.data;
+      if (errorData && errorData.detail) {
+        return { error: errorData.detail as string };
+      }
+      if (errorData && errorData.message) {
+        // This could be a message from our backend (like 502 error with chat_response)
+        // or another error structure. Let's prioritize error.detail if it was from HTTPException
+        return { error: errorData.message as string }; 
+      }
+    }
+    return { error: "Failed to get recommendations. Please try again." };
   }
 };
 

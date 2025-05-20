@@ -63,47 +63,64 @@ export const RecipeChat = () => {
     setError(null);
 
     try {
-      // Call recipe API
       const response = await getRecipeRecommendation(input);
+      console.log("Recipe API response:", response); // Keep for debugging the new structure
 
-      // Log the response for debugging
-      console.log("Recipe API response:", response);
-
-      // Check if we have a valid response
-      if (response && Array.isArray(response) && response.length > 0) {
-        // Get the first recipe from the response
-        const recipe = response[0];
+      if (response.recipes && response.recipes.length > 0) {
+        const recipe = response.recipes[0]; // For simplicity, still taking the first recipe
         setSelectedRecipe(recipe);
-
-        // Add response to chat with recipe
         const botMessage: Message = {
-          id: `bot-${Date.now()}`,
-          content: "Here's a recipe recommendation based on your pantry:",
+          id: `bot-recipe-${Date.now()}`,
+          content: "Here's a recipe recommendation:",
           isUser: false,
           recipe: recipe,
         };
         setMessages((prev) => [...prev, botMessage]);
-      } else {
-        // No recipes found
+      } else if (response.message) {
+        // Successfully received a chat message (or an error formatted as such by backend)
         const botMessage: Message = {
-          id: `bot-${Date.now()}`,
+          id: `bot-chat-${Date.now()}`,
+          content: response.message,
+          isUser: false,
+        };
+        setMessages((prev) => [...prev, botMessage]);
+        // If the backend itself signaled an error within its chat_response (which api.ts might pass as message if also error true)
+        // we might want to show it in the error alert. For now, just showing in chat.
+        // The primary error display is for errors caught by the frontend api.ts service via response.error.
+      } else if (response.error) {
+        // Error explicitly caught and formatted by the frontend api.ts service
+        const botMessage: Message = {
+          id: `bot-error-${Date.now()}`,
+          content: response.error, // Display error message in chat
+          isUser: false,
+        };
+        setMessages((prev) => [...prev, botMessage]);
+        setError(response.error); // Also display in the main error Alert component
+      } else {
+        // Fallback: Neither recipes, nor a chat message, nor a service-level error.
+        // This could be an empty recipes array from AI when it understood a recipe request but found nothing.
+        const botMessage: Message = {
+          id: `bot-no-specific-recipes-${Date.now()}`,
           content:
-            "I couldn't find any suitable recipes with your current pantry items.",
+            "I couldn't find specific recipes for that, or your request was a bit general. Try asking something else or be more specific about a recipe!",
           isUser: false,
         };
         setMessages((prev) => [...prev, botMessage]);
       }
     } catch (error) {
-      console.error("Error:", error);
-
-      // Add error message to chat
+      // This catch block handles network errors or other unexpected issues not caught by api.ts
+      console.error("Error in handleSubmit catch block:", error);
+      const errorMessageContent =
+        error instanceof Error
+          ? error.message
+          : "Sorry, an unexpected error occurred. Please try again.";
       const errorMessage: Message = {
-        id: `error-${Date.now()}`,
-        content: "Sorry, I encountered an error. Please try again.",
+        id: `error-fallback-${Date.now()}`,
+        content: errorMessageContent,
         isUser: false,
       };
       setMessages((prev) => [...prev, errorMessage]);
-      setError("Failed to get recipe recommendations");
+      setError("Failed to communicate with the recipe service.");
     } finally {
       setLoading(false);
     }

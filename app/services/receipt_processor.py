@@ -86,7 +86,7 @@ class ReceiptProcessor:
             base64_image = self._encode_image_to_base64(processed_img_data)
             
             response = await self.client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o-mini", #Good for vision
                 messages=[
                     {
                         "role": "system",
@@ -94,7 +94,7 @@ class ReceiptProcessor:
                         Your task is to extract grocery items as accurately as possible, including:
                         
                         1. Item name (generic product name, remove brand names)
-                        2. Quantity (numeric value, default to 1.0 if unclear)
+                        2. Quantity (numeric value, default to 1.0 if no quantity is specified)
                         3. Unit of measurement (e.g., can, bottle, lb, oz, package, item)
                         4. Category (pantry, dairy, produce, meat, bakery, other)
                         

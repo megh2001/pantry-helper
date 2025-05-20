@@ -137,14 +137,29 @@ async def get_recipe_recommendations(
     ]
     
     recommender = RecipeRecommender()
-    recommendations = await recommender.get_recipe_recommendations(ingredients_list, user_prompt)
+    service_response = await recommender.get_recipe_recommendations(ingredients_list, user_prompt)
     
-    # Get the recipes list from the recommendations
-    recipes = recommendations.get("recipes", [])
+    # Check if the response is a direct chat message or an error from the service
+    if "chat_response" in service_response:
+        if service_response.get("error"):
+            # You might want a specific status code for errors from the recommender service
+            raise HTTPException(status_code=502, detail=service_response["chat_response"])
+        return {"message": service_response["chat_response"]}
+    
+    # If not a chat response, proceed with recipe processing
+    if "recipes" not in service_response or not isinstance(service_response["recipes"], list):
+        # This case should ideally be handled by the error state in chat_response,
+        # but as a fallback:
+        raise HTTPException(status_code=500, detail="Received an unexpected response format from the recipe service.")
+
+    recipes = service_response["recipes"]
+    
     if not recipes:
+        # If the AI explicitly returns an empty recipe list, but not as a chat_response.
+        # This could mean it understood a recipe request but found nothing based on strict criteria.
         raise HTTPException(
             status_code=404,
-            detail="No recipes found. Please try a different search or add more ingredients."
+            detail="No recipes found matching your criteria. Try a different prompt or add more ingredients."
         )
     
     # Filter recipes to only include ingredients we have and adjust quantities
