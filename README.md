@@ -1,6 +1,6 @@
 # Pantry Tracker & Recipe Bot
 
-A comprehensive LLM application that tracks your pantry, recommends recipes and automatically manages your shopping lists
+A comprehensive LLM application that tracks your pantry, recommends recipes and automatically manages your shopping lists.  
 This project uses FastAPI for the backend and React for the frontend.
 
 ## Features
