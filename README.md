@@ -1,10 +1,11 @@
 # Pantry Tracker & Recipe Bot
 
-A full-stack web application designed to help you manage your pantry inventory efficiently and discover new recipes based on the ingredients you already have. This project uses FastAPI for the backend and React for the frontend.
+A comprehensive LLM application that tracks your pantry, recommends recipes and automatically manages your shopping lists
+This project uses FastAPI for the backend and React for the frontend.
 
 ## Features
 
-- **Receipt Processing:** Upload images of your grocery receipts to automatically add items to your pantry using OpenAI's GPT-4o mini Vision model.
+- **Receipt Processing:** Upload images of your grocery receipts to automatically add items to your pantry using OpenAI's GPT-4o mini model.
 - **Inventory Management:** Keep track of item quantities, units, and categories.
 - **Recipe Recommendations:** Get intelligent recipe suggestions based on your current pantry stock and optional user prompts (e.g., "quick dinner ideas", "vegetarian meals").
 - **Ingredient Usage Tracking:** When you decide to make a recipe, the app can automatically deduct the used ingredients from your pantry.
