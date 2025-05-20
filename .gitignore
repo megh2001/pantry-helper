@@ -155,6 +155,7 @@ cython_debug/
 # SQLite
 *.sqlite3
 *.sqlite3-journal
+*.db
 
 # dotenv
 .env.*
